@@ -1,0 +1,11 @@
+﻿  scrape.c
+C:\Users\user\source\repos\WebScrape\scrape.c(52,40): warning C4047: '==': 'int' differs in levels of indirection from 'unsigned short [2]'
+C:\Users\user\source\repos\WebScrape\scrape.c(63,11): warning C4477: 'wprintf' : format string '%s' requires an argument of type 'unsigned short *', but variadic argument 1 has type 'const char *'
+      C:\Users\user\source\repos\WebScrape\scrape.c(63,11):
+      consider using '%hs' in the format string
+      C:\Users\user\source\repos\WebScrape\scrape.c(63,11):
+      consider using '%Ts' in the format string
+      C:\Users\user\source\repos\WebScrape\scrape.c(63,11):
+      this warning is based on non-standard semantics used by Visual C++
+  
+  WebScrape.vcxproj -> C:\Users\user\source\repos\WebScrape\x64\Debug\WebScrape.exe
