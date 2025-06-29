@@ -1,11 +1,9 @@
 ﻿  scrape.c
-C:\Users\user\source\repos\WebScrape\scrape.c(52,40): warning C4047: '==': 'int' differs in levels of indirection from 'unsigned short [2]'
-C:\Users\user\source\repos\WebScrape\scrape.c(63,11): warning C4477: 'wprintf' : format string '%s' requires an argument of type 'unsigned short *', but variadic argument 1 has type 'const char *'
-      C:\Users\user\source\repos\WebScrape\scrape.c(63,11):
-      consider using '%hs' in the format string
-      C:\Users\user\source\repos\WebScrape\scrape.c(63,11):
-      consider using '%Ts' in the format string
-      C:\Users\user\source\repos\WebScrape\scrape.c(63,11):
-      this warning is based on non-standard semantics used by Visual C++
-  
+C:\Users\user\source\repos\WebScrape\scrape.c(24,2): warning C4013: 'strncpy_s' undefined; assuming extern returning int
+C:\Users\user\source\repos\WebScrape\scrape.c(39,6): warning C4013: 'strcspn' undefined; assuming extern returning int
+  utfTranslator.c
+C:\Users\user\source\repos\WebScrape\utfTranslator.c(9,2): warning C4013: 'snprintf' undefined; assuming extern returning int
+  Generating Code...
   WebScrape.vcxproj -> C:\Users\user\source\repos\WebScrape\x64\Debug\WebScrape.exe
+  'pwsh.exe' is not recognized as an internal or external command,
+  operable program or batch file.

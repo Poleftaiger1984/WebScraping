@@ -15,15 +15,30 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="scrape.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cJSON.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bookkeeping.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="utfTranslator.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globals.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cJSON.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="bookkeeping.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utfTranslator.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
