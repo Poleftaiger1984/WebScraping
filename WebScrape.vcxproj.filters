@@ -41,5 +41,11 @@
     <ClInclude Include="utfTranslator.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="x64\Release\resources\style_bluish.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="x64\Release\resources\style_terminal.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

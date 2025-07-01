@@ -21,4 +21,19 @@ void utf8ToWideCharSafe(const char* input, wchar_t* output, int outputSize)
 	{
 			output[0] = L'\0';
 	}
+	
+}
+
+void toggleTerminalVisibility(bool check)
+{
+	if (check)
+	{
+		HWND hwnd = GetConsoleWindow();
+		ShowWindow(hwnd, SW_SHOW);
+	}
+	else
+	{
+		HWND hwnd = GetConsoleWindow();
+		ShowWindow(hwnd, SW_HIDE);
+	}
 }

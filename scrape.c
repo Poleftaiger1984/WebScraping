@@ -1,6 +1,13 @@
-﻿#define WIN32_LEAN_AND_MEAN  
+﻿#define _CRT_SECURE_NO_WARNINGS
+
+#define WIN32_LEAN_AND_MEAN  
 #define NOMINMAX
 #include "raylib.h"
+
+#define RAYGUI_IMPLEMENTATION
+#define RAYGUI_SUPPORT_TEXT_EDITING 
+#include "raygui.h"
+#include "x64/Release/resources/style_terminal.h"
 
 #include <locale.h>
 #include <wchar.h>
@@ -10,150 +17,260 @@
 #include "globals.h"
 #include "cJSON.h"
 
+void setSelectors(bool* manualMode);
 itemDetails* parseJSONOutput(const char* jsonInput);
-void utf8ToWideCharSafe(const char* input, wchar_t* output, int outputSize);
 
 int main()
 {	
-	setlocale(LC_ALL, "en_US.UTF - 8");
+	/* Initialize */
 
-	/* Build JS Path */
+	setlocale(LC_ALL, "en_US.UTF - 8");
 
 	strncpy_s(script, MAX_PATH, getScriptPath(), MAX_PATH);
 
-	/* Build JS Path */
-
-	/* Initialize Excel */
+	InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Scraper");
+	Font myFont = LoadFont("resources/IBMPlexMono-Regular.ttf");
+	SetTargetFPS(60);
 	
 	initExcel();
 
-	/* Initialize Excel */
+	/* Initialize */
+	bool editMode = false;
+	bool checkedManual = false;
+	bool checkedTerminal = false;
 
-
-	/* Input */
-
-	printf("Enter your URL: \n");
-	fgets(url, sizeof(url), stdin);
-	url[strcspn(url, "\n")] = '\0'; //At the point where \n shows up replace it with null terminator
-
-	printf("Enter the CSS selector for the item pages: \n");
-	fgets(linkSelector, sizeof(linkSelector), stdin);
-	linkSelector[strcspn(linkSelector, "\n")] = '\0';
-
-	printf("Enter the CSS selector for item variations: \n");
-	fgets(variationSelector, sizeof(variationSelector), stdin);
-	variationSelector[strcspn(variationSelector, "\n")] = '\0';
-
-	printf("Enter the CSS selector for the item titles: \n");
-	fgets(titleSelector, sizeof(titleSelector), stdin);
-	titleSelector[strcspn(titleSelector, "\n")] = '\0';
-
-	printf("Enter the CSS selector for store area: \n");
-	fgets(storeAreaSelector, sizeof(storeAreaSelector), stdin);
-	storeAreaSelector[strcspn(storeAreaSelector, "\n")] = '\0';
-
-	printf("Enter the CSS selector for the store name: \n");
-	fgets(storeSelector, sizeof(storeSelector), stdin);
-	storeSelector[strcspn(storeSelector, "\n")] = '\0';
-
-	printf("Enter the CSS selector for the store price: \n");
-	fgets(priceSelector, sizeof(priceSelector), stdin);
-	priceSelector[strcspn(priceSelector, "\n")] = '\0';
-
-	printf("Enter the CSS selector for the store's item page: \n");
-	fgets(storeItemsSelector, sizeof(storeItemsSelector), stdin);
-	storeItemsSelector[strcspn(storeItemsSelector, "\n")] = '\0';
-
-	printf("Enter the CSS selector for the store's info page: \n");
-	fgets(storeInfoSelector, sizeof(storeInfoSelector), stdin);
-	storeInfoSelector[strcspn(storeInfoSelector, "\n")] = '\0';
-
-	printf("Enter the CSS selector for the store's desired contact info: \n");
-	fgets(storeEmailSelector, sizeof(storeEmailSelector), stdin);
-	storeEmailSelector[strcspn(storeEmailSelector, "\n")] = '\0';
-
-	/* Input */
-
-	/* Construct command and run JS Script */
-
-	snprintf(command, sizeof(command), "node \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\"", 
-		script, 
-		url, 
-		linkSelector, 
-		variationSelector, 
-		titleSelector, 
-		storeAreaSelector, 
-		storeSelector, 
-		priceSelector, 
-		storeItemsSelector, 
-		storeInfoSelector, 
-		storeEmailSelector);
-	fp = _popen(command, "r");
-
-	if (!fp)
+	while (!WindowShouldClose())
 	{
-		perror("Failed to run Node Script. Make sure node.js is installed");
-		return 1;
+		BeginDrawing();
+
+		Color background = { 12, 21, 5, 255 };
+
+		GuiSetStyle(DEFAULT, TEXT_SIZE, 25);
+		GuiSetStyle(DEFAULT, TEXT_COLOR_NORMAL, ColorToInt(GREEN));
+		GuiSetStyle(DEFAULT, TEXT_COLOR_FOCUSED, ColorToInt(DARKGREEN));
+		GuiSetStyle(DEFAULT, TEXT_COLOR_PRESSED, ColorToInt(GREEN));
+		GuiSetStyle(DEFAULT, BASE_COLOR_PRESSED, ColorToInt(GRAY));
+		GuiSetStyle(DEFAULT, BORDER_COLOR_FOCUSED, ColorToInt(GREEN));
+
+		GuiSetStyle(BUTTON, BACKGROUND_COLOR, ColorToInt(GREEN));
+		ClearBackground(background);
+		GuiSetFont(myFont);
+		
+		Rectangle textBox = { 56, 80, MAX_SELECTOR_SIZE * 3, 50 };
+		Rectangle checkBox = { 56, 190, 20, 20 };
+		Rectangle startButton = { 56, WINDOW_HEIGHT - 100, 50, 70 };
+
+		DrawRectangleLines(10, 10, WINDOW_WIDTH - 20, WINDOW_HEIGHT - 20, GRAY);
+		DrawRectangleLines(20, 20, WINDOW_WIDTH - 40, WINDOW_HEIGHT - 40, GRAY);
+
+		if (editMode && IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_V))
+		{
+			const char* clip = GetClipboardText();
+			if (clip)
+			{
+				strncpy_s(url, sizeof(url), clip, MAX_SELECTOR_SIZE);
+				url[sizeof(url) - 1] = '\0';
+			}
+		}
+
+		GuiLabel((Rectangle) { 56, 40, 200, 50 }, "ENTER YOUR URL: ");
+		if (GuiTextBox(textBox, url, sizeof(url), editMode))
+			editMode = !editMode;
+		/* Input */
+
+		GuiLabel((Rectangle) { 56, 150, 200, 50 }, "ADVANCED SETTINGS ");
+
+		if (GuiCheckBox((Rectangle) { 56, 200, 20, 20 }, "SHOW TERMINAL", &checkedTerminal));
+		{
+			checkedTerminal != checkedTerminal;
+			toggleTerminalVisibility(checkedTerminal);
+		}
+
+		if(GuiCheckBox((Rectangle) { 56, 240, 20, 20 }, "MANUAL SELECTOR CONTROL", &checkedManual));
+		{
+			checkedManual != checkedManual;
+			setSelectors(checkedManual);
+		}
+			
+		if (GuiLabelButton(startButton, "BEGIN SCRAPING"))
+		{
+			snprintf(command, sizeof(command), "node \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\"",
+				script,
+				url,
+				linkSelector,
+				variationSelector,
+				titleSelector,
+				storeAreaSelector,
+				storeSelector,
+				priceSelector,
+				storeItemsSelector,
+				storeInfoSelector,
+				storeEmailSelector);
+			fp = _popen(command, "r");
+
+			itemDetails* details = calloc(1, sizeof(itemDetails));
+
+			char* jsonRaw = malloc(MAX_BUFFER);
+			if (!jsonRaw)
+			{
+				fprintf(stderr, "Failed to allocate memory for the raw JSON buffer.\n");
+				_pclose(fp);
+				free(details);
+				return 1;
+			}
+
+			size_t bytesRead = fread(jsonRaw, 1, MAX_BUFFER - 1, fp);
+			jsonRaw[bytesRead] = '\0';
+			_pclose(fp);
+
+			if (bytesRead == 0) {
+				fprintf(stderr, "No data was read from the script.\n");
+				free(jsonRaw);
+				free(details);
+				return 1;
+			}
+
+			details = parseJSONOutput(jsonRaw);
+			if (!details)
+			{
+				printf("Items array failed at allocation.\n");
+				free(jsonRaw);
+				free(details);
+				return 1;
+			}
+
+			printf("Raw JSON output (%zu bytes):\n%s\n", bytesRead, jsonRaw);
+			printf("Parsed product count: %d\n", details->productCount);
+			wprintf(L"Variation Count: %d\n", details->products[0].variationCount);
+			wprintf(L"Store Count: %d\n", details->products[0].variations[0].storeCount);
+
+			/* Read JSON Output */
+
+			/* Write to Excel */
+
+			writeToExcel(details);
+
+			/* Write to Excel */
+
+			/* Save and Deallocate */
+
+			if(saveExcel()) GuiLabel((Rectangle) { 250, WINDOW_HEIGHT - 100, 50, 70 }, "SAVED TO EXCEL SUCCESSFULLY");
+
+			free(details);
+			free(jsonRaw);
+
+			/* Save and Deallocate */
+		}
+		else if (url == 0)
+		{
+			GuiLabel((Rectangle) { 250, WINDOW_HEIGHT - 100, 50, 70 }, "URL CANNOT BE EMPTY");
+		}
+
+		EndDrawing();
 	}
 
-	/* Construct command and run JS Script */
+	//printf("Enter your URL: \n");
+	//fgets(url, sizeof(url), stdin);
+	//url[strcspn(url, "\n")] = '\0'; //At the point where \n shows up replace it with null terminator
 
-	/* Read JSON Output */
-
-	itemDetails* details = calloc(1, sizeof(itemDetails));
-
-	char* jsonRaw = malloc(MAX_BUFFER);
-	if (!jsonRaw)
-	{
-		fprintf(stderr, "Failed to allocate memory for the raw JSON buffer.\n");
-		_pclose(fp);
-		free(details);
-		return 1;
-	}
-
-	size_t bytesRead = fread(jsonRaw, 1, MAX_BUFFER - 1, fp);
-	jsonRaw[bytesRead] = '\0';
-	_pclose(fp);
-
-	if (bytesRead == 0) {
-		fprintf(stderr, "No data was read from the script.\n");
-		free(jsonRaw);
-		free(details);
-		return 1;
-	}
-
-	details = parseJSONOutput(jsonRaw);
-	if (!details)
-	{
-		printf("Items array failed at allocation.\n");
-		free(jsonRaw);
-		free(details);
-		return 1;
-	}
-
-	printf("Raw JSON output (%zu bytes):\n%s\n", bytesRead, jsonRaw);
-	printf("Parsed product count: %d\n", details->productCount);
-	wprintf(L"Variation Count: %d\n", details->products[0].variationCount);
-	wprintf(L"Store Count: %d\n", details->products[0].variations[0].storeCount);
-
-	/* Read JSON Output */
-
-	writeToExcel(details);
-
-	/* Write to Excel */
-
-	/* Write to Excel */
-
-	/* Save and Deallocate */
-
-	saveExcel();
-
-	free(details);
-	free(jsonRaw);
-
-	/* Save and Deallocate */
+	CloseWindow();
 
 	return 0;
+}
+
+void setSelectors(bool* manualMode)
+{
+	if (manualMode == false)
+	{
+		strncpy_s(linkSelector, MAX_SELECTOR_SIZE, "a.js-sku-link[data-e2e-testid=\"sku-title-link\"]", MAX_SELECTOR_SIZE);
+		strncpy_s(variationSelector, MAX_SELECTOR_SIZE, "li.with-image.spec-variant", MAX_SELECTOR_SIZE);
+		strncpy_s(titleSelector, MAX_SELECTOR_SIZE, "h1.page-title", MAX_SELECTOR_SIZE);
+		strncpy_s(storeAreaSelector, MAX_SELECTOR_SIZE, "li[data-testid=\"product-card\"]", MAX_SELECTOR_SIZE);
+		strncpy_s(storeSelector, MAX_SELECTOR_SIZE, ".shop-name", MAX_SELECTOR_SIZE);
+		strncpy_s(priceSelector, MAX_SELECTOR_SIZE, "strong.dominant-price", MAX_SELECTOR_SIZE);
+		strncpy_s(storeItemsSelector, MAX_SELECTOR_SIZE, "a.shop-products.icon", MAX_SELECTOR_SIZE);
+		strncpy_s(storeInfoSelector, MAX_SELECTOR_SIZE, "div.shop-services a.shop-info", MAX_SELECTOR_SIZE);
+		strncpy_s(storeEmailSelector, MAX_SELECTOR_SIZE, "div.shop-contact p:nth-of-type(3)", MAX_SELECTOR_SIZE);
+
+	}
+
+	else if (manualMode == true)
+	{
+		static int activeTextBox = -1;
+
+		//printf("Enter the CSS selector for the item pages: \n");
+		if (GuiTextBox((Rectangle) { 56, 270, MAX_SELECTOR_SIZE * 3, 20 }, linkSelector, sizeof(linkSelector), activeTextBox == SELECTOR_LINK))
+		{
+			activeTextBox = (activeTextBox == SELECTOR_LINK) ? -1 : SELECTOR_LINK;
+		}
+
+		//fgets(linkSelector, sizeof(linkSelector), stdin);
+		//linkSelector[strcspn(linkSelector, "\n")] = '\0';
+
+		//printf("Enter the CSS selector for item variations: \n");
+		if (GuiTextBox((Rectangle) { 56, 300, MAX_SELECTOR_SIZE * 3, 20 }, variationSelector, sizeof(variationSelector), activeTextBox == SELECTOR_VARIATION))
+		{
+			activeTextBox = (activeTextBox == SELECTOR_VARIATION) ? -1 : SELECTOR_VARIATION;
+		}
+		/*fgets(variationSelector, sizeof(variationSelector), stdin);
+		variationSelector[strcspn(variationSelector, "\n")] = '\0';*/
+
+		//printf("Enter the CSS selector for the item titles: \n");
+		if (GuiTextBox((Rectangle) { 56, 330, MAX_SELECTOR_SIZE * 3, 20 }, titleSelector, sizeof(titleSelector), activeTextBox == SELECTOR_TITLE))
+		{
+			activeTextBox = (activeTextBox == SELECTOR_TITLE) ? -1 : SELECTOR_TITLE;
+		}
+		/*fgets(titleSelector, sizeof(titleSelector), stdin);
+		titleSelector[strcspn(titleSelector, "\n")] = '\0';*/
+
+		//printf("Enter the CSS selector for store area: \n");
+		if (GuiTextBox((Rectangle) { 56, 360, MAX_SELECTOR_SIZE * 3, 20 }, storeAreaSelector, sizeof(storeAreaSelector), activeTextBox == SELECTOR_AREA))
+		{
+			activeTextBox = (activeTextBox == SELECTOR_AREA) ? -1 : SELECTOR_AREA;
+		}
+		/*fgets(storeAreaSelector, sizeof(storeAreaSelector), stdin);
+		storeAreaSelector[strcspn(storeAreaSelector, "\n")] = '\0';*/
+
+		//printf("Enter the CSS selector for the store name: \n");
+		if (GuiTextBox((Rectangle) { 56, 390, MAX_SELECTOR_SIZE * 3, 20 }, storeSelector, sizeof(storeSelector), activeTextBox == SELECTOR_STORE))
+		{
+			activeTextBox = (activeTextBox == SELECTOR_STORE) ? -1 : SELECTOR_STORE;
+		}
+		/*fgets(storeSelector, sizeof(storeSelector), stdin);
+		storeSelector[strcspn(storeSelector, "\n")] = '\0';*/
+
+		//printf("Enter the CSS selector for the store price: \n");
+		if (GuiTextBox((Rectangle) { 56, 420, MAX_SELECTOR_SIZE * 3, 20 }, priceSelector, sizeof(priceSelector), activeTextBox == SELECTOR_PRICE))
+		{
+			activeTextBox = (activeTextBox == SELECTOR_PRICE) ? -1 : SELECTOR_PRICE;
+		}
+		/*fgets(priceSelector, sizeof(priceSelector), stdin);
+		priceSelector[strcspn(priceSelector, "\n")] = '\0';*/
+
+		//printf("Enter the CSS selector for the store's item page: \n");
+		if (GuiTextBox((Rectangle) { 56, 450, MAX_SELECTOR_SIZE * 3, 20 }, storeItemsSelector, sizeof(storeItemsSelector), activeTextBox == SELECTOR_STORE_ITEMS))
+		{
+			activeTextBox = (activeTextBox == SELECTOR_STORE_ITEMS) ? -1 : SELECTOR_STORE_ITEMS;
+		}
+		/*fgets(storeItemsSelector, sizeof(storeItemsSelector), stdin);
+		storeItemsSelector[strcspn(storeItemsSelector, "\n")] = '\0';*/
+
+		//printf("Enter the CSS selector for the store's info page: \n");
+		if (GuiTextBox((Rectangle) { 56, 480, MAX_SELECTOR_SIZE * 3, 20 }, storeInfoSelector, sizeof(storeInfoSelector), activeTextBox == SELECTOR_STORE_INFO))
+		{
+			activeTextBox = (activeTextBox == SELECTOR_STORE_INFO) ? -1 : SELECTOR_STORE_INFO;
+		}
+		/*fgets(storeInfoSelector, sizeof(storeInfoSelector), stdin);
+		storeInfoSelector[strcspn(storeInfoSelector, "\n")] = '\0';*/
+
+		//printf("Enter the CSS selector for the store's desired contact info: \n");
+		if (GuiTextBox((Rectangle) { 56, 510, MAX_SELECTOR_SIZE * 3, 20 }, storeEmailSelector, sizeof(storeEmailSelector), activeTextBox == SELECTOR_STORE_EMAIL))
+		{
+			activeTextBox = (activeTextBox == SELECTOR_STORE_EMAIL) ? -1 : SELECTOR_STORE_EMAIL;
+		}
+		/*fgets(storeEmailSelector, sizeof(storeEmailSelector), stdin);
+		storeEmailSelector[strcspn(storeEmailSelector, "\n")] = '\0';*/
+	}
 }
 
 

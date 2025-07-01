@@ -94,15 +94,16 @@ void writeToExcel(itemDetails* details)
 	/* Write to EXCEL */
 }
 
-void saveExcel()
+bool saveExcel()
 {
 	if (!xlBookSaveW(book, L"prices.xlsx"))
 	{
 		printf("Failed to save Excel file.: %s\n\n", xlBookErrorMessageW(book));
 		xlBookReleaseW(book);
-		return 1;
+		return false;
 	}
 
 	xlBookReleaseW(book);
 	wprintf(L"\nData written to prices.xlsx successfully.\n");
+	return true;
 }

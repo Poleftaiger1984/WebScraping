@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #pragma comment(lib, "Shlwapi.lib")
 
+#define WINDOW_HEIGHT 720
+#define WINDOW_WIDTH 500
+
 #define MAX_PRODUCTS 40
 #define MAX_VARIATIONS 40
 #define MAX_STORES 100
@@ -65,6 +68,18 @@ typedef struct itemDetails
 	int productCount;
 
 }itemDetails;
+
+typedef enum {
+	SELECTOR_LINK		 = 0,
+	SELECTOR_VARIATION	 = 1,
+	SELECTOR_TITLE		 = 2,
+	SELECTOR_AREA		 = 3,
+	SELECTOR_STORE		 = 4,
+	SELECTOR_PRICE		 = 5,
+	SELECTOR_STORE_ITEMS = 6,
+	SELECTOR_STORE_INFO  = 7,
+	SELECTOR_STORE_EMAIL = 8
+}Selectors;
 
 #endif // !GLOBALS_H
 
